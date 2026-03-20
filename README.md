@@ -6,8 +6,8 @@ Minimalist curl with HTTP/3 support built on Alpine Linux.
 
 - **HTTP/3** via Cloudflare's quiche
 - **HTTP/2** via nghttp2
-- **Ultra-lightweight** ~20MB
-- Includes **httpstat** for request timing visualization
+- **Ultra-lightweight** ~13MB
+- Production-ready HTTP client
 
 ## Quick Start
 
@@ -16,29 +16,13 @@ Minimalist curl with HTTP/3 support built on Alpine Linux.
 docker pull overdigo/tiny-curl-http3
 
 # Basic HTTP/3 request
-docker run -it --rm overdigo/tiny-curl-http3 curl -IL https://blog.cloudflare.com --http3-only
-
-# HTTP/3 with fallback to HTTP2
-docker run -it --rm overdigo/tiny-curl-http3 curl -IL https://blog.cloudflare.com --http3
+docker run --rm overdigo/tiny-curl-http3 https://cloudflare.com/
 
 # Verbose (shows protocol)
-docker run -it --rm overdigo/tiny-curl-http3 curl -ILv https://blog.cloudflare.com --http3
-```
+docker run --rm overdigo/tiny-curl-http3 -v https://cloudflare.com/
 
-## Using httpstat
-
-```bash
-# Basic httpstat
-docker run --rm overdigo/tiny-curl-http3 httpstat https://cloudflare.com/
-
-# With HTTP/3
-docker run --rm overdigo/tiny-curl-http3 httpstat --http3 https://cloudflare.com/
-```
-
-Output:
-```
-  DNS   TCP   TLS  Server  TTFB   Content
-  12ms  15ms  28ms    45ms   85ms     15KB
+# Check supported protocols
+docker run --rm overdigo/tiny-curl-http3 -V
 ```
 
 ## HTTP Version Flags
@@ -49,11 +33,21 @@ Output:
 | `--http3-only` | Only HTTP/3 |
 | `--http2` | Only HTTP/2 |
 
-## Verify HTTP/3 Support
+## Examples
 
+### HTTP/3 only
 ```bash
-docker run --rm overdigo/tiny-curl-http3 curl -V
-# Should show: +quic +http3
+docker run --rm overdigo/tiny-curl-http3 --http3-only https://blog.cloudflare.com
+```
+
+### HTTP/2 fallback
+```bash
+docker run --rm overdigo/tiny-curl-http3 --http3 https://blog.cloudflare.com
+```
+
+### Verbose with headers
+```bash
+docker run --rm overdigo/tiny-curl-http3 -ILv https://blog.cloudflare.com
 ```
 
 ## Alias (Recommended)
@@ -61,8 +55,13 @@ docker run --rm overdigo/tiny-curl-http3 curl -V
 Add to your `.bashrc` or `.zshrc`:
 
 ```bash
-alias curl3='docker run --rm -it overdigo/tiny-curl-http3 curl'
-alias httpstat3='docker run --rm -it overdigo/tiny-curl-http3 httpstat'
+alias curl3='docker run --rm -it overdigo/tiny-curl-http3'
+```
+
+Then use:
+
+```bash
+curl3 -v https://cloudflare.com/
 ```
 
 ---
@@ -90,8 +89,7 @@ cd tiny-curl-http3
 docker build -t tiny-curl-http3 .
 
 # Test locally
-docker run --rm tiny-curl-http3 curl -V
-docker run --rm tiny-curl-http3 httpstat https://cloudflare.com/
+docker run --rm tiny-curl-http3 -V
 
 # Tag and push to Docker Hub
 docker tag tiny-curl-http3:latest overdigo/tiny-curl-http3:latest
@@ -100,7 +98,7 @@ docker push overdigo/tiny-curl-http3:latest
 
 ### Build Arguments
 
-You can customize versions during build:
+Customize versions during build:
 
 ```bash
 docker build \
@@ -112,7 +110,7 @@ docker build \
 ## Image Details
 
 - **Base:** Alpine 3.23
-- **Size:** ~18MB (compressed)
+- **Size:** ~13MB (compressed)
 - **Architecture:** linux/amd64, linux/arm64
 - **Docker Hub:** https://hub.docker.com/r/overdigo/tiny-curl-http3
 
@@ -121,7 +119,7 @@ docker build \
 - Testing HTTP/3 endpoints
 - Debugging HTTP/3 connections
 - CI/CD pipelines
-- Performance analysis with httpstat
+- Lightweight HTTP client in containers
 
 ## Credits
 

@@ -10,8 +10,7 @@ Minimalist curl with HTTP/3 support built on Alpine Linux.
 
 - **HTTP/3** via Cloudflare's quiche
 - **HTTP/2** via nghttp2
-- **Ultra-lightweight** ~20MB
-- Includes **httpstat** for timing
+- **Ultra-lightweight** ~13MB
 
 ---
 
@@ -36,14 +35,6 @@ docker run -it --rm overdigo/tiny-curl-http3 curl -IL https://blog.cloudflare.co
 
 ```bash
 docker run -it --rm overdigo/tiny-curl-http3 curl -IL https://blog.cloudflare.com --http3
-```
-
----
-
-## httpstat
-
-```bash
-docker run -it --rm overdigo/tiny-curl-http3 httpstat -ILv https://blog.cloudflare.com --http3
 ```
 
 ---
