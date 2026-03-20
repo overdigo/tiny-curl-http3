@@ -74,7 +74,8 @@ libgcc \
 libpsl \
 zstd-libs \
 brotli-libs \
-bash && \
+bash \
+perl && \
 rm -rf /var/cache/apk/*
 
 COPY --from=builder /staging/usr/local/ /usr/local/
