@@ -22,7 +22,7 @@ docker run -it --rm overdigo/tiny-curl-http3 curl -IL https://blog.cloudflare.co
 docker run -it --rm overdigo/tiny-curl-http3 curl -IL https://blog.cloudflare.com --http3
 
 # Verbose (shows protocol)
-docker run -it --rm overdigo/tiny-curl-http3 httpstat -ILv https://blog.cloudflare.com --http3
+docker run -it --rm overdigo/tiny-curl-http3 curl -ILv https://blog.cloudflare.com --http3
 ```
 
 ## Using httpstat
