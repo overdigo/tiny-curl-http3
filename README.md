@@ -111,6 +111,7 @@ docker build \
 - **Base:** Alpine 3.23
 - **Size:** ~18MB (compressed)
 - **Architecture:** linux/amd64, linux/arm64
+- **Docker Hub:** https://hub.docker.com/r/overdigo/tiny-curl-http3
 
 ## Use Cases
 
@@ -118,6 +119,10 @@ docker build \
 - Debugging HTTP/3 connections
 - CI/CD pipelines
 - Performance analysis with httpstat
+
+## Credits
+
+This project is based on the original work by [yurymuski/curl-http3](https://github.com/yurymuski/curl-http3).
 
 ## License
 
