@@ -6,8 +6,9 @@ Minimalist curl with HTTP/3 support built on Alpine Linux.
 
 - **HTTP/3** via Cloudflare's quiche
 - **HTTP/2** via nghttp2
-- **Ultra-lightweight** ~13MB
+- **Ultra-lightweight** ~20MB
 - Production-ready HTTP client
+- For linux/**amd64** and linux/**arm64**
 
 ## Quick Start
 
@@ -16,13 +17,13 @@ Minimalist curl with HTTP/3 support built on Alpine Linux.
 docker pull overdigo/tiny-curl-http3
 
 # Basic HTTP/3 request
-docker run --rm overdigo/tiny-curl-http3 https://cloudflare.com/
+docker run -it --rm overdigo/tiny-curl-http3 curl -IL --http3-only https://blog.cloudflare.com
 
 # Verbose (shows protocol)
-docker run --rm overdigo/tiny-curl-http3 -v https://cloudflare.com/
+docker run -it --rm overdigo/tiny-curl-http3 curl -ILv --http3-only https://blog.cloudflare.com
 
 # Check supported protocols
-docker run --rm overdigo/tiny-curl-http3 -V
+docker run --rm overdigo/tiny-curl-http3 curl -V
 ```
 
 ## HTTP Version Flags
@@ -55,7 +56,7 @@ docker run --rm overdigo/tiny-curl-http3 -ILv https://blog.cloudflare.com
 Add to your `.bashrc` or `.zshrc`:
 
 ```bash
-alias curl3='docker run --rm -it overdigo/tiny-curl-http3'
+alias curl3='docker run --rm -it overdigo/tiny-curl-http3 curl'
 ```
 
 Then use:
@@ -89,7 +90,7 @@ cd tiny-curl-http3
 docker build -t tiny-curl-http3 .
 
 # Test locally
-docker run --rm tiny-curl-http3 -V
+docker run --rm tiny-curl-http3 curl -V
 
 # Tag and push to Docker Hub
 docker tag tiny-curl-http3:latest overdigo/tiny-curl-http3:latest
@@ -110,7 +111,7 @@ docker build \
 ## Image Details
 
 - **Base:** Alpine 3.23
-- **Size:** ~13MB (compressed)
+- **Size:** ~20MB or 13MB(compressed)
 - **Architecture:** linux/amd64, linux/arm64
 - **Docker Hub:** https://hub.docker.com/r/overdigo/tiny-curl-http3
 
