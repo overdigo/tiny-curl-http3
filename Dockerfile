@@ -2,7 +2,13 @@ FROM alpine:3.23 AS builder
 
 WORKDIR /opt
 
+# Versões das dependências
+# 📌 CURL: Verificar versões em https://github.com/curl/curl/releases
+#    Use o tag como referência, ex: curl-8_19_0
 ARG CURL_VERSION=curl-8_19_0
+
+# 📌 QUICHE: Verificar versões em https://github.com/cloudflare/quiche/releases
+#    Use o número da versão, ex: 0.24.2
 ARG QUICHE_VERSION=0.24.2
 
 RUN apk add --no-cache \
