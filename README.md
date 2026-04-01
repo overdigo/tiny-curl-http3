@@ -14,16 +14,27 @@ Minimalist curl with HTTP/3 support built on Alpine Linux.
 
 ```bash
 # Pull the image
-docker pull overdigo/tiny-curl-http3
+  docker pull overdigo/tiny-curl-http3
+# show version
+  docker run -it --rm overdigo/tiny-curl-http3 curl -V
+```
 
 # Basic HTTP/3 request
-docker run -it --rm overdigo/tiny-curl-http3 curl -IL --http3-only https://blog.cloudflare.com
+
+```bash
+  docker run -it --rm overdigo/tiny-curl-http3 curl -IL --http3-only https://blog.cloudflare.com
+```
 
 # Verbose (shows protocol)
-docker run -it --rm overdigo/tiny-curl-http3 curl -ILv --http3-only https://blog.cloudflare.com
 
-# Check supported protocols
-docker run --rm overdigo/tiny-curl-http3 curl -V
+```bash
+  docker run -it --rm overdigo/tiny-curl-http3 curl -ILv --http3-only https://blog.cloudflare.com
+```
+
+# Ignore SSL certificate
+
+```bash
+  docker run -it --rm overdigo/tiny-curl-http3 curl -ILk --http3-only https://blog.cloudflare.com
 ```
 
 ## HTTP Version Flags
@@ -36,19 +47,14 @@ docker run --rm overdigo/tiny-curl-http3 curl -V
 
 ## Examples
 
-### HTTP/3 only
-```bash
-docker run --rm overdigo/tiny-curl-http3 --http3-only https://blog.cloudflare.com
-```
-
 ### HTTP/2 fallback
 ```bash
-docker run --rm overdigo/tiny-curl-http3 --http3 https://blog.cloudflare.com
+  docker run --rm overdigo/tiny-curl-http3 curl -IL --http3 https://blog.cloudflare.com
 ```
 
-### Verbose with headers
+### Test host nginx with http3
 ```bash
-docker run --rm overdigo/tiny-curl-http3 -ILv https://blog.cloudflare.com
+  docker run --rm --add-host=host.docker.internal:host-gateway overdigo/tiny-curl-http3 curl --no-progress-meter -kIL --http3-only https://host.docker.internal
 ```
 
 ## Alias (Recommended)
@@ -56,13 +62,13 @@ docker run --rm overdigo/tiny-curl-http3 -ILv https://blog.cloudflare.com
 Add to your `.bashrc` or `.zshrc`:
 
 ```bash
-alias curl3='docker run --rm -it overdigo/tiny-curl-http3 curl'
+  alias curl3='docker run --rm -it overdigo/tiny-curl-http3 curl'
 ```
 
 Then use:
 
 ```bash
-curl3 -v https://cloudflare.com/
+  curl3 -v https://cloudflare.com/
 ```
 
 ---
