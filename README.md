@@ -19,19 +19,19 @@ Minimalist curl with HTTP/3 support built on Alpine Linux.
   docker run -it --rm overdigo/tiny-curl-http3 curl -V
 ```
 
-# Basic HTTP/3 request
+## Basic HTTP/3 request
 
 ```bash
   docker run -it --rm overdigo/tiny-curl-http3 curl -IL --http3-only https://blog.cloudflare.com
 ```
 
-# Verbose (shows protocol)
+## Verbose (shows protocol)
 
 ```bash
   docker run -it --rm overdigo/tiny-curl-http3 curl -ILv --http3-only https://blog.cloudflare.com
 ```
 
-# Ignore SSL certificate
+## Ignore SSL certificate
 
 ```bash
   docker run -it --rm overdigo/tiny-curl-http3 curl -ILk --http3-only https://blog.cloudflare.com
