@@ -1,39 +1,65 @@
-FROM alpine:3.23 AS builder
+ARG ALPINE_VERSION=3.24
+FROM alpine:${ALPINE_VERSION} AS builder
 
 WORKDIR /opt
 
 # Versões das dependências
-# 📌 CURL: Verificar versões em https://github.com/curl/curl/releases
-#    Use o tag como referência, ex: curl-8_19_0
-ARG CURL_VERSION=curl-8_19_0
+ARG CURL_VERSION=curl-8_21_0
+ARG QUICHE_VERSION=0.24.9
 
-# 📌 QUICHE: Verificar versões em https://github.com/cloudflare/quiche/releases
-#    Use o número da versão, ex: 0.24.2
-ARG QUICHE_VERSION=0.24.2
-
+# Instala dependências de build (sem cargo/rust do apk - usaremos rustup)
 RUN apk add --no-cache \
-    build-base git autoconf automake libtool cmake go \
-    curl nghttp2-dev zlib-dev perl linux-headers \
+    build-base \
+    git \
+    autoconf \
+    automake \
+    libtool \
+    cmake \
+    go \
+    curl \
+    nghttp2-dev \
+    zlib-dev \
+    perl \
+    linux-headers \
     libpsl-dev \
     zstd-dev \
-    brotli-dev
+    brotli-dev \
+    pkgconfig
 
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y -q
+# Instala Rust via rustup
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path --default-toolchain stable
+ENV PATH="/root/.cargo/bin:$PATH"
+ENV CARGO_HOME="/root/.cargo"
 
+# Clone do quiche com submódulos recursivos
 RUN git clone --recursive https://github.com/cloudflare/quiche
 
-RUN export PATH="$HOME/.cargo/bin:$PATH" && \
-    cd quiche && \
-    git checkout $QUICHE_VERSION && \
-    cargo build --package quiche --release --features ffi,pkg-config-meta,qlog && \
-    mkdir quiche/deps/boringssl/src/lib && \
-    ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) \
-        quiche/deps/boringssl/src/lib/
+# Checkout da versão e atualização dos submódulos
+WORKDIR /opt/quiche
+RUN git checkout $QUICHE_VERSION && \
+    git submodule update --init --recursive
 
+# Verifica se o boringssl foi clonado corretamente
+RUN ls -la quiche/deps/boringssl/ && \
+    test -f quiche/deps/boringssl/CMakeLists.txt || (echo "BoringSSL CMakeLists.txt não encontrado!" && exit 1)
+
+# Build do quiche
+RUN cargo build --package quiche --release --features ffi,pkg-config-meta,qlog
+
+# Prepara bibliotecas do boringssl
+RUN mkdir -p quiche/deps/boringssl/src/lib && \
+    find target/release -name "libcrypto.a" -o -name "libssl.a" | \
+    while read lib; do \
+        ln -vnf "$lib" quiche/deps/boringssl/src/lib/; \
+    done
+
+# Clone do curl
+WORKDIR /opt
 RUN git clone https://github.com/curl/curl
 
-RUN cd curl && \
-    git checkout $CURL_VERSION && \
+# Build do curl
+WORKDIR /opt/curl
+RUN git checkout $CURL_VERSION && \
     autoreconf -fi && \
     ./configure \
         LDFLAGS="-Wl,-rpath,/usr/local/lib" \
@@ -44,53 +70,39 @@ RUN cd curl && \
         --with-libpsl \
         --with-zstd \
         --with-brotli \
-        --without-libpsl \
         --disable-static \
         --disable-manual \
         --disable-docs && \
     make -j$(nproc) && \
     make DESTDIR="/staging/" install
 
-# ── Limpa o que não é necessário em runtime ──────────────────
+# Limpa o que não é necessário em runtime
 RUN rm -rf /staging/usr/local/include \
            /staging/usr/local/share \
            /staging/usr/local/lib/pkgconfig \
            /staging/usr/local/bin/curl-config
 
 # Strip nos binários e libs para reduzir tamanho
-RUN strip --strip-unneeded /staging/usr/local/bin/curl
-RUN find /staging/usr/local/lib -name "*.so*" | xargs strip --strip-unneeded 2>/dev/null || true
-
-# ── Copia SOMENTE a libquiche.so (não o target/release inteiro!) ──
-# ── Copia SOMENTE a libquiche (não o target/release inteiro!) ──
-RUN mkdir -p /quiche-libs && \
-    find /opt/quiche/target/release -maxdepth 1 \( -name "libquiche.so*" -o -name "libquiche.dylib" \) \
-        -exec cp {} /quiche-libs/ \; && \
-    ls -lah /quiche-libs/ && \
-    find /quiche-libs -name "*.so*" | xargs strip --strip-unneeded 2>/dev/null || true
+RUN strip --strip-unneeded /staging/usr/local/bin/curl && \
+    find /staging/usr/local/lib -name "*.so*" | xargs strip --strip-unneeded 2>/dev/null || true
 
 # ── Imagem final ──────────────────────────────────────────────
-FROM alpine:3.23
+FROM alpine:${ALPINE_VERSION}
 
 RUN apk add --no-cache \
-ca-certificates \
-nghttp2-libs \
-zlib \
-libgcc \
-libpsl \
-zstd-libs \
-brotli-libs \
-bash \
-perl && \
-rm -rf /var/cache/apk/*
+    ca-certificates \
+    nghttp2-libs \
+    zlib \
+    libgcc \
+    libpsl \
+    zstd-libs \
+    brotli-libs \
+    bash \
+    perl && \
+    rm -rf /var/cache/apk/*
 
 COPY --from=builder /staging/usr/local/ /usr/local/
-COPY --from=builder /quiche-libs/ /usr/local/lib/
 
 RUN ldconfig /usr/local/lib || true
-
-RUN wget -qO /usr/local/bin/httpstat \
-https://raw.githubusercontent.com/babarot/httpstat/master/httpstat && \
-chmod +x /usr/local/bin/httpstat
 
 CMD ["curl"]

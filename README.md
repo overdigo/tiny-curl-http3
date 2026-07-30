@@ -79,11 +79,11 @@ Then use:
 
 | Component | Version |
 |-----------|---------|
-| Alpine Linux | 3.23 |
-| curl | 8.19.0 |
-| quiche | 0.24.2 |
-| nghttp2 | 1.68.0 |
-| Rust | stable |
+| [Alpine Linux](https://alpinelinux.org/releases/) | 3.24 |
+| [curl](https://curl.se/changes.html) | 8.21.0 |
+| [quiche](https://github.com/cloudflare/quiche/releases) | 0.24.9 |
+| [nghttp2](https://github.com/nghttp2/nghttp2/releases) | 1.69.0 |
+| [Rust](https://releases.rs/) | stable 1.97.1 |
 
 ### Build Commands
 
